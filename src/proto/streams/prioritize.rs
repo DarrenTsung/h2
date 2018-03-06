@@ -538,14 +538,6 @@ impl Prioritize {
         // TODO: make this more efficient?
         while let Some(frame) = stream.pending_send.pop_front(buffer) {
             trace!("dropping; frame={:?}", frame);
-
-            if let Frame::Data(frame) = frame {
-                let sz = frame.payload().remaining();
-                trace!(" --> reassigning capacity: {}", sz);
-
-                // reassign back capacity for the connection for dropped frames
-                self.flow.assign_capacity(sz as u32);
-            }
         }
 
         stream.buffered_send_data = 0;

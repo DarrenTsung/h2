@@ -299,7 +299,8 @@ impl Send {
     {
         // Clear all pending outbound frames
         self.prioritize.clear_queue(buffer, stream);
-        self.prioritize.reclaim_all_capacity(stream);
+        // Don't give capacity back to other steams as the
+        // window size is not given back as well
     }
 
     pub fn recv_err<B>(
