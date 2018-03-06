@@ -1,8 +1,8 @@
-use http;
-use super::*;
 use codec::{RecvError, UserError};
 use codec::UserError::*;
 use frame::{self, Reason};
+use http;
+use super::*;
 
 use bytes::Buf;
 
@@ -281,6 +281,16 @@ impl Send {
         }
 
         Ok(())
+    }
+
+    pub fn recv_reset<B>(
+        &mut self,
+        buffer: &mut Buffer<Frame<B>>,
+        stream: &mut store::Ptr
+    ) {
+        // Clear all pending outbound frames
+        self.prioritize.clear_queue(buffer, stream);
+        self.prioritize.reclaim_all_capacity(stream);
     }
 
     pub fn recv_err<B>(
