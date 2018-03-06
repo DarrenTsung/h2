@@ -547,6 +547,9 @@ impl Prioritize {
                 self.flow.assign_capacity(sz as u32);
             }
         }
+
+        stream.buffered_send_data = 0;
+        stream.requested_send_capacity = 0;
     }
 
     fn pop_frame<B>(
