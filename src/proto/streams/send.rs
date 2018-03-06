@@ -105,7 +105,10 @@ impl Send {
         buffer: &mut Buffer<Frame<B>>,
         stream: &mut store::Ptr,
         task: &mut Option<Task>,
-    ) {
+    )
+    where
+        B: Buf
+    {
         let is_reset = stream.state.is_reset();
         let is_closed = stream.state.is_closed();
         let is_empty = stream.pending_send.is_empty();
@@ -269,7 +272,10 @@ impl Send {
         buffer: &mut Buffer<Frame<B>>,
         stream: &mut store::Ptr,
         task: &mut Option<Task>,
-    ) -> Result<(), Reason> {
+    ) -> Result<(), Reason>
+    where
+        B: Buf
+    {
         if let Err(e) = self.prioritize.recv_stream_window_update(sz, stream) {
             debug!("recv_stream_window_update !!; err={:?}", e);
 
@@ -287,7 +293,10 @@ impl Send {
         &mut self,
         buffer: &mut Buffer<Frame<B>>,
         stream: &mut store::Ptr
-    ) {
+    )
+    where
+        B: Buf
+    {
         // Clear all pending outbound frames
         self.prioritize.clear_queue(buffer, stream);
         self.prioritize.reclaim_all_capacity(stream);
@@ -297,7 +306,10 @@ impl Send {
         &mut self,
         buffer: &mut Buffer<Frame<B>>,
         stream: &mut store::Ptr
-    ) {
+    )
+    where
+        B: Buf
+    {
         // Clear all pending outbound frames
         self.prioritize.clear_queue(buffer, stream);
         self.prioritize.reclaim_all_capacity(stream);
@@ -309,7 +321,10 @@ impl Send {
         buffer: &mut Buffer<Frame<B>>,
         store: &mut Store,
         task: &mut Option<Task>,
-    ) -> Result<(), RecvError> {
+    ) -> Result<(), RecvError>
+    where
+        B: Buf
+    {
         // Applies an update to the remote endpoint's initial window size.
         //
         // Per RFC 7540 §6.9.2:

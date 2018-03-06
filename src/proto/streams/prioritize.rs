@@ -291,7 +291,7 @@ impl Prioritize {
     where
         R: Resolve,
     {
-        trace!("assign_connection_capacity; inc={}", inc);
+        trace!("assign_connection_capacity; inc={} | cur={}", inc, self.flow.available());
 
         self.flow.assign_capacity(inc);
 
@@ -525,12 +525,27 @@ impl Prioritize {
         }
     }
 
-    pub fn clear_queue<B>(&mut self, buffer: &mut Buffer<Frame<B>>, stream: &mut store::Ptr) {
+    pub fn clear_queue<B>(
+        &mut self,
+        buffer: &mut Buffer<Frame<B>>,
+        stream: &mut store::Ptr
+    )
+    where
+        B: Buf
+    {
         trace!("clear_queue; stream-id={:?}", stream.id);
 
         // TODO: make this more efficient?
         while let Some(frame) = stream.pending_send.pop_front(buffer) {
             trace!("dropping; frame={:?}", frame);
+
+            if let Frame::Data(frame) = frame {
+                let sz = frame.payload().remaining();
+                trace!(" --> reassigning capacity: {}", sz);
+
+                // reassign back capacity for the connection for dropped frames
+                self.flow.assign_capacity(sz as u32);
+            }
         }
     }
 
@@ -550,6 +565,14 @@ impl Prioritize {
             match self.pending_send.pop(store) {
                 Some(mut stream) => {
                     trace!("pop_frame; stream={:?}", stream.id);
+
+                    // Streams that are reset should not be sending frames
+                    // Why are they still present in pending_send? They already
+                    // have a flag + move efficient to handle here instead of traversing
+                    // the queue to remove each element one-by-one
+                    if stream.state.is_reset() {
+                        continue;
+                    }
 
                     // It's possible that this stream, besides having data to send,
                     // is also queued to send a reset, and thus is already in the queue

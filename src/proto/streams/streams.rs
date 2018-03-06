@@ -18,6 +18,7 @@ use std::sync::{Arc, Mutex};
 pub(crate) struct Streams<B, P>
 where
     P: Peer,
+    B: Buf,
 {
     /// Holds most of the connection and stream related state for processing
     /// HTTP/2.0 frames associated with streams.
@@ -38,7 +39,10 @@ where
 
 /// Reference to the stream state
 #[derive(Debug)]
-pub(crate) struct StreamRef<B> {
+pub(crate) struct StreamRef<B>
+where
+    B: Buf
+{
     opaque: OpaqueStreamRef,
     send_buffer: Arc<SendBuffer<B>>,
 }
@@ -659,6 +663,7 @@ where
 impl<B, P> Streams<B, P>
 where
     P: Peer,
+    B: Buf,
 {
     pub fn num_active_streams(&self) -> usize {
         let me = self.inner.lock().unwrap();
@@ -689,6 +694,7 @@ where
 impl<B, P> Clone for Streams<B, P>
 where
     P: Peer,
+    B: Buf,
 {
     fn clone(&self) -> Self {
         Streams {
@@ -701,7 +707,10 @@ where
 
 // ===== impl StreamRef =====
 
-impl<B> StreamRef<B> {
+impl<B> StreamRef<B>
+where
+    B: Buf
+{
     pub fn send_data(&mut self, data: B, end_stream: bool) -> Result<(), UserError>
     where
         B: Buf,
@@ -841,7 +850,10 @@ impl<B> StreamRef<B> {
     }
 }
 
-impl<B> Clone for StreamRef<B> {
+impl<B> Clone for StreamRef<B>
+where
+    B: Buf
+{
     fn clone(&self) -> Self {
         StreamRef {
             opaque: self.opaque.clone(),
@@ -1019,7 +1031,10 @@ impl Actions {
         buffer: &mut Buffer<Frame<B>>,
         stream: &mut store::Ptr,
         res: Result<(), RecvError>,
-    ) -> Result<(), RecvError> {
+    ) -> Result<(), RecvError>
+    where
+        B: Buf,
+    {
         if let Err(RecvError::Stream {
             reason, ..
         }) = res
