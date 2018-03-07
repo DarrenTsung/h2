@@ -247,7 +247,7 @@ where
             return Err(RecvError::Connection(Reason::PROTOCOL_ERROR));
         }
 
-        let stream = match me.store.find_mut(&id) {
+        let mut stream = match me.store.find_mut(&id) {
             Some(stream) => stream,
             None => {
                 // TODO: Are there other error cases?
@@ -264,7 +264,14 @@ where
 
         let actions = &mut me.actions;
 
+        // HACK (darren): how does this get set and not removed from concurrency limit?
+        // Mark the stream as not being pending open before transitioning
+        // because it counts toward the concurrency limit
+        stream.is_pending_open = false;
+
         me.counts.transition(stream, |_, stream| {
+            // HACK (darren): omg wow this is a super hack
+            stream.is_pending_open = true;
             actions.recv.recv_reset(frame, stream)?;
             actions.send.recv_reset(send_buffer, stream);
             assert!(stream.state.is_closed());
