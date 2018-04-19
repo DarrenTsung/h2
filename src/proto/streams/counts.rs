@@ -41,6 +41,16 @@ impl Counts {
         }
     }
 
+    pub fn log_everything(&self, prepend: &str) {
+        info!("{} - peer: {:?}", prepend, self.peer);
+        info!("{} - max_send_streams: {:?}", prepend, self.max_send_streams);
+        info!("{} - num_send_streams: {:?}", prepend, self.num_send_streams);
+        info!("{} - max_recv_streams: {:?}", prepend, self.max_recv_streams);
+        info!("{} - num_recv_streams: {:?}", prepend, self.num_recv_streams);
+        info!("{} - max_reset_streams: {:?}", prepend, self.max_reset_streams);
+        info!("{} - num_reset_streams: {:?}", prepend, self.num_reset_streams);
+    }
+
     /// Returns the current peer
     pub fn peer(&self) -> peer::Dyn {
         self.peer

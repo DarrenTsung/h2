@@ -112,6 +112,15 @@ where
         }
     }
 
+    pub fn log_everything(&self, prepend: &str) {
+        let me = self.inner.lock().unwrap();
+
+        me.counts.log_everything(prepend);
+        info!("{} - ::actions task: {:?}", prepend, me.actions.task);
+        info!("{} - ::actions conn_error: {:?}", prepend, me.actions.conn_error);
+        me.store.log_everything(prepend);
+    }
+
     pub fn set_target_connection_window_size(&mut self, size: WindowSize) {
         let mut me = self.inner.lock().unwrap();
         let me = &mut *me;

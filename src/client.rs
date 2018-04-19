@@ -388,6 +388,12 @@ where
         Ok(().into())
     }
 
+    /// NO DOCUMENTATION REQUIRED
+    pub fn log_everything(&self, prepend: &str) {
+        info!("{} - self.pending: {:?}", prepend, self.pending);
+        self.inner.log_everything(prepend);
+    }
+
     /// Consumes `self`, returning a future that returns `self` back once it is
     /// ready to send a request.
     ///

@@ -100,6 +100,13 @@ impl Store {
         })
     }
 
+    pub fn log_everything(&self, prepend: &str) {
+        for (key, value) in self.ids.iter() {
+            info!("{} - (key, value): ({:?}, {:?})", prepend, key, value);
+        }
+        info!("{} - counter: {:?}", prepend, self.counter);
+    }
+
     pub fn insert(&mut self, id: StreamId, val: Stream) -> Ptr {
         let store_id = self.counter;
         self.counter = self.counter.wrapping_add(1);
