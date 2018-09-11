@@ -171,6 +171,7 @@ impl Settings {
             }
         }
 
+        error!("Settings frame received: {:?}", settings);
         Ok(settings)
     }
 
